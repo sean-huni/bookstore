@@ -14,7 +14,7 @@ The project is subdivided into 3 micro-projects:
 - H2DB
 
 # Future Version
-With further anticipation of migrating to the Spring-Cloud as the project grows in magnitude. The backend project shall be modularised into several micro-services.
+With further anticipation of migrating to the Spring-Cloud as the project grows in magnitude. Future releases of the backend project shall be modularised into several micro-services.
 
 # Config
 ## Setup
