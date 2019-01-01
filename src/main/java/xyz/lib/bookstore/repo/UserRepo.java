@@ -1,6 +1,6 @@
 package xyz.lib.bookstore.repo;
 
-import xyz.lib.bookstore.domain.User;
+import xyz.lib.bookstore.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

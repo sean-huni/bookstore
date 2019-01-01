@@ -1,6 +1,6 @@
 package xyz.lib.bookstore.service.impl;
 
-import xyz.lib.bookstore.domain.User;
+import xyz.lib.bookstore.model.User;
 import xyz.lib.bookstore.repo.UserRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
