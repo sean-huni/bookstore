@@ -11,16 +11,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 import xyz.lib.bookstore.dto.BookDTO;
 import xyz.lib.bookstore.enums.CategoryEnum;
 import xyz.lib.bookstore.enums.FormatEnum;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.math.BigDecimal;
 import java.util.Date;
 
@@ -110,7 +115,7 @@ public class BookIntegrationTest {
 
     @Test
     public void cGivenValidBook_whenCreatingNewBook_thenSuccess() throws Exception {
-        final Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy, HH:mm:ss").create();
+        final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
         final BookDTO bookDTO = new BookDTO();
 
         newTestBook(bookDTO);
@@ -140,7 +145,7 @@ public class BookIntegrationTest {
 
     @Test
     public void dGivenBookId_whenUpdatingBook_thenSuccess() throws Exception {
-        final Gson gson = new GsonBuilder().setDateFormat("MMM dd, yyyy, HH:mm:ss").create();
+        final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
         BookDTO bookDTO = new BookDTO();
         newTestBook(bookDTO);
 
@@ -165,7 +170,26 @@ public class BookIntegrationTest {
     }
 
     @Test
-    public void eGivenBookId_whenDeleteBook_thenSuccess() throws Exception {
+    public void eGivenBookIdAndImgFile_whenUploadingImg_thenSuccess() throws Exception {
+        // Mock Request
+        File file = new File("/home/sean/Pictures/a5.png");
+        BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
+
+        final byte[] bytes;
+        try (inputStream) {
+            bytes = inputStream.readAllBytes();
+        }
+
+        MockMultipartFile jsonFile = new MockMultipartFile("image", bytes);
+
+        mockMvc.perform(MockMvcRequestBuilders.multipart("/v1/books/" + testID + "/images")
+                .file("multipart", jsonFile.getBytes())
+                .characterEncoding("UTF-8"))
+                .andExpect(status().isCreated());
+    }
+
+    @Test
+    public void fGivenBookId_whenDeleteBook_thenSuccess() throws Exception {
         mockMvc.perform(delete("/v1/books/" + testID)
                 .contentType("application/json;charset=UTF-8"))
                 .andDo(print())

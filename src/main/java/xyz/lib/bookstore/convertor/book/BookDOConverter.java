@@ -44,6 +44,7 @@ public class BookDOConverter implements Converter<BookDTO, Book> {
         book.setActive(bookDTO.isActive());
         book.setDescription(bookDTO.getDescription());
         book.setQuantity(bookDTO.getQuantity());
+        book.setImgPath(bookDTO.getImgPath());
 //        book.setBookImage(bookDTO.getBookImage());
 
         return book;

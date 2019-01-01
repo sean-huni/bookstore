@@ -52,6 +52,17 @@ public class BookServiceImpl implements BookService {
     }
 
     /**
+     * Finds all books that match the keyword criteria.
+     *
+     * @param keyword criteria for searching the book-titles.
+     * @return a {@link Collection<BookDTO>} that match the the criteria.
+     */
+    @Override
+    public Collection<BookDTO> findAllBooksByTitleContaining(String keyword) {
+        return bookRepo.findAllByTitleContaining(keyword).stream().filter(Book::isActive).map(book -> bookDTOConverter.convert(book)).collect(Collectors.toList());
+    }
+
+    /**
      * Find all {@link BookDTO}.
      *
      * @return A {@link Collection <BookDTO>} of {@link Book}.
@@ -59,8 +70,7 @@ public class BookServiceImpl implements BookService {
     @Override
     public Collection<BookDTO> findAllBooks() {
         List<Book> bookList = bookRepo.findAll();
-
-        return bookList.stream().map(book -> bookDTOConverter.convert(book)).collect(Collectors.toList());
+        return bookList.stream().filter(Book::isActive).map(book -> bookDTOConverter.convert(book)).collect(Collectors.toList());
     }
 
     /**
@@ -77,9 +87,7 @@ public class BookServiceImpl implements BookService {
 //        }
 
         newBook.setId(null);
-
         Book book = bookDOConverter.convert(newBook);
-
         return bookDTOConverter.convert(bookRepo.save(book));
     }
 

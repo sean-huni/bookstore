@@ -1,14 +1,18 @@
 package xyz.lib.bookstore.controller.v1;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import xyz.lib.bookstore.dto.BookDTO;
 import xyz.lib.bookstore.exception.BookConstraintViolationException;
 import xyz.lib.bookstore.exception.ResourceNotFound;
 import xyz.lib.bookstore.service.BookService;
+import xyz.lib.bookstore.service.StorageService;
 
 import javax.validation.Valid;
 import java.util.Collection;
@@ -28,11 +32,14 @@ import static xyz.lib.bookstore.constants.Constants.PATH_VARIABLE_ID_IS_EXPECTED
 @RestController
 @RequestMapping("/v1/books")
 public class BookController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(BookController.class);
     private BookService bookService;
+    private StorageService storageService;
 
     @Autowired
-    public BookController(BookService bookService) {
+    public BookController(BookService bookService, StorageService storageService) {
         this.bookService = bookService;
+        this.storageService = storageService;
     }
 
     @PostMapping
@@ -48,8 +55,11 @@ public class BookController {
 
     @GetMapping
     @ResponseBody
-    public Collection<BookDTO> readAllBooks() {
+    public Collection<BookDTO> readAllBooks(@RequestParam(value = "all-by-title", required = false) String title) {
         //Logic to retrieve resource.
+        if (title != null && !title.trim().isEmpty()) {
+            return bookService.findAllBooksByTitleContaining(title);
+        }
         return bookService.findAllBooks();
     }
 
@@ -70,9 +80,30 @@ public class BookController {
         }
     }
 
+
+    /**
+     * Uploads the image to the server.
+     * Precondition: the id of the {@link BookDTO} must exist in the database before saving the new image.
+     *
+     * @param id        of the {@link BookDTO}
+     * @param multipart {@link MultipartFile}
+     * @return {@link HttpStatus} to indicate success/failure.
+     */
+    @PostMapping(value = "/{id}/images")
+    @ResponseBody
+    public ResponseEntity<String> createBookImg(@PathVariable("id") Long id, @RequestParam("multipart") MultipartFile multipart) {
+        try {
+            storageService.uploadFile(id, multipart);
+            return new ResponseEntity<>("Upload Successful!", HttpStatus.CREATED);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
     @PutMapping("/{id}")
     @ResponseBody
-    public BookDTO updateBookById(@PathVariable(name = "id") Long id, @Valid @RequestBody BookDTO bookDTO) throws Exception {
+    public BookDTO updateBookById(@PathVariable(name = "id") Long id, @Valid @RequestBody BookDTO bookDTO) {
         //Logic to update resource.
         Optional<Long> optionalId = Optional.ofNullable(id);
 

@@ -3,7 +3,9 @@ package xyz.lib.bookstore;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import xyz.lib.bookstore.config.EncryptionConfig;
+import xyz.lib.bookstore.config.StorageProperties;
 import xyz.lib.bookstore.model.Role;
 import xyz.lib.bookstore.model.User;
 import xyz.lib.bookstore.model.UserRole;
@@ -14,6 +16,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @SpringBootApplication
+@EnableConfigurationProperties(StorageProperties.class)
 public class BookstoreApplication {
     private UserService userService;
     private EncryptionConfig securityUtility;
