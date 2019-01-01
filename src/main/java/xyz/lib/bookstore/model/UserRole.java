@@ -1,4 +1,4 @@
-package xyz.lib.bookstore.domain;
+package xyz.lib.bookstore.model;
 
 import lombok.AccessLevel;
 import lombok.Getter;

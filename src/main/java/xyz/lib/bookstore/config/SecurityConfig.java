@@ -12,7 +12,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.web.http.HeaderHttpSessionStrategy;
 import org.springframework.session.web.http.HttpSessionStrategy;
 import xyz.lib.bookstore.service.impl.UserDetailsServiceImpl;
-import xyz.lib.bookstore.utility.SecurityUtility;
 
 import static xyz.lib.bookstore.constants.Constants.PUBLIC_MATCHERS;
 
@@ -30,9 +29,16 @@ import static xyz.lib.bookstore.constants.Constants.PUBLIC_MATCHERS;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private Environment env;
     private UserDetailsServiceImpl userSecurityServiceImpl;
+    private EncryptionConfig securityUtility;
+
 
     private BCryptPasswordEncoder passwordEncoder() {
-        return SecurityUtility.passwordEncoder();
+        return securityUtility.passwordEncoder();
+    }
+
+    @Autowired
+    public void setSecurityUtility(EncryptionConfig securityUtility) {
+        this.securityUtility = securityUtility;
     }
 
     @Override

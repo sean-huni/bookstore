@@ -2,7 +2,7 @@ package xyz.lib.bookstore.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import xyz.lib.bookstore.model.Role;
+import xyz.lib.bookstore.model.Book;
 
 import java.util.Collection;
 
@@ -10,13 +10,14 @@ import java.util.Collection;
  * PROJECT   : bookstore
  * PACKAGE   : xyz.lib.bookstore.repo
  * USER      : sean
- * DATE      : 29-Sat-Dec-2018
- * TIME      : 00:49
+ * DATE      : 30-Sun-Dec-2018
+ * TIME      : 15:24
  * E-MAIL    : kudzai@bcs.org
  * CELL      : +27-64-906-8809
  */
 @Repository
-public interface RoleRepo extends JpaRepository<Role, Long> {
-    Collection<Role> findAllByName(String name);
+public interface BookRepo extends JpaRepository<Book, Long> {
+    Book findBookByTitle(String title);
 
+    Collection<Book> findAllByAuthorContains(String author);
 }

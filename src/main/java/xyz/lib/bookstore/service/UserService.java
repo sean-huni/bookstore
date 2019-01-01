@@ -1,7 +1,7 @@
 package xyz.lib.bookstore.service;
 
-import xyz.lib.bookstore.domain.User;
-import xyz.lib.bookstore.domain.UserRole;
+import xyz.lib.bookstore.model.User;
+import xyz.lib.bookstore.model.UserRole;
 import xyz.lib.bookstore.exception.UserAlreadyExistException;
 
 import java.util.Set;

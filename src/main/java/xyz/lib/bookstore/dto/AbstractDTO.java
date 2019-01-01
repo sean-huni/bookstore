@@ -1,9 +1,5 @@
-package xyz.lib.bookstore.domain;
+package xyz.lib.bookstore.dto;
 
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 /**
@@ -16,12 +12,8 @@ import java.io.Serializable;
  * CELL      : +27-64-906-8809
  */
 
-@MappedSuperclass
-public abstract class AbstractDO implements Serializable {
+public abstract class AbstractDTO implements Serializable {
     private static final Long serialVersionUID = 3455534529382937L;
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     public Long getId() {

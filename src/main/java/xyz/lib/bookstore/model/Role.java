@@ -1,4 +1,4 @@
-package xyz.lib.bookstore.domain;
+package xyz.lib.bookstore.model;
 
 import javax.persistence.*;
 import java.io.Serializable;

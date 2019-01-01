@@ -1,4 +1,4 @@
-package xyz.lib.bookstore.domain;
+package xyz.lib.bookstore.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.springframework.security.core.GrantedAuthority;

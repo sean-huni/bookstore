@@ -17,4 +17,7 @@ public class Constants {
             "/book/**",
             "/user/**"
     };
+
+    public static final String PATH_VARIABLE_ID_IS_EXPECTED = "Book ID cannot be null or zero. PathVariable 'id' is expected.";
+
 }
