@@ -19,5 +19,7 @@ import java.util.Collection;
 public interface BookRepo extends JpaRepository<Book, Long> {
     Book findBookByTitle(String title);
 
+    Collection<Book> findAllByTitleContaining(String keyword);
+
     Collection<Book> findAllByAuthorContains(String author);
 }

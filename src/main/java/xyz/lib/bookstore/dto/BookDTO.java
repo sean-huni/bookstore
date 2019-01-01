@@ -21,13 +21,14 @@ import java.util.Date;
  */
 
 public class BookDTO extends AbstractDTO implements Serializable {
-    private static final Long serialVersionUID = 3478349384L;
+    private static final Long serialVersionUID = 347834938234L;
 
     @NotEmpty(message = "{error.book.title}")
     private String title;
     private String author;
     private String publisher;
-    @JsonFormat(pattern = "MMM dd, yyyy, HH:mm:ss")
+    //    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern =  "yyyy-MM-dd HH:mm:ss", locale = "en_GB")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", locale = "en_GB")
     private Date datePublished;
     private String language;
     @CategoryConstraint(message = "{error.book.category}")
@@ -42,6 +43,7 @@ public class BookDTO extends AbstractDTO implements Serializable {
     private Boolean active;
     private String description;
     private Integer quantity;
+    private String imgPath;
     private MultipartFile bookImage;
 
     public String getTitle() {
@@ -162,6 +164,14 @@ public class BookDTO extends AbstractDTO implements Serializable {
 
     public void setQuantity(Integer quantity) {
         this.quantity = quantity;
+    }
+
+    public String getImgPath() {
+        return imgPath;
+    }
+
+    public void setImgPath(String imgPath) {
+        this.imgPath = imgPath;
     }
 
     public MultipartFile getBookImage() {

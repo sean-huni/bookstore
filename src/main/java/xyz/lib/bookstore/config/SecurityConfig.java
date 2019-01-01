@@ -3,12 +3,10 @@ package xyz.lib.bookstore.config;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.session.web.http.HeaderHttpSessionStrategy;
 import org.springframework.session.web.http.HttpSessionStrategy;
 import xyz.lib.bookstore.service.impl.UserDetailsServiceImpl;
@@ -27,18 +25,13 @@ import static xyz.lib.bookstore.constants.Constants.PUBLIC_MATCHERS;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private Environment env;
     private UserDetailsServiceImpl userSecurityServiceImpl;
-    private EncryptionConfig securityUtility;
-
-
-    private BCryptPasswordEncoder passwordEncoder() {
-        return securityUtility.passwordEncoder();
-    }
+    private EncryptionConfig encryptionConfig;
 
     @Autowired
-    public void setSecurityUtility(EncryptionConfig securityUtility) {
-        this.securityUtility = securityUtility;
+    public SecurityConfig(EncryptionConfig encryptionConfig, UserDetailsServiceImpl userSecurityServiceImpl) {
+        this.encryptionConfig = encryptionConfig;
+        this.userSecurityServiceImpl = userSecurityServiceImpl;
     }
 
     @Override
@@ -48,23 +41,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
     @Autowired
-    public void setEnv(Environment env) {
-        this.env = env;
-    }
-
-    @Autowired
-    public void setUserSecurityServiceImpl(UserDetailsServiceImpl userSecurityServiceImpl) {
-        this.userSecurityServiceImpl = userSecurityServiceImpl;
-    }
-
-    @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userSecurityServiceImpl).passwordEncoder(passwordEncoder());
+        auth.userDetailsService(userSecurityServiceImpl).passwordEncoder(encryptionConfig.passwordEncoder());
     }
-
 
     @Bean
-    public HttpSessionStrategy httpSessionStrategy(){
+    public HttpSessionStrategy httpSessionStrategy() {
         return new HeaderHttpSessionStrategy();
     }
 }

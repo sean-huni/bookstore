@@ -27,6 +27,14 @@ public interface BookService {
     BookDTO findBookById(Long id) throws ResourceNotFound;
 
     /**
+     * Finds all books that match the keyword criteria.
+     *
+     * @param keyword criteria for searching the book-titles.
+     * @return a {@link Collection<BookDTO>} that match the the criteria.
+     */
+    Collection<BookDTO> findAllBooksByTitleContaining(String keyword);
+
+    /**
      * Find all {@link BookDTO}.
      *
      * @return A {@link Collection<BookDTO>} of {@link BookDTO}.
