@@ -47,39 +47,12 @@ public class BookController {
     public BookDTO createBook(@Valid @RequestBody BookDTO book) {
         //Logic to save a new book resource.
         try {
+            book.setId(null);
             return bookService.saveNewBook(book);
         } catch (BookConstraintViolationException ex) {
             throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
         }
     }
-
-    @GetMapping
-    @ResponseBody
-    public Collection<BookDTO> readAllBooks(@RequestParam(value = "all-by-title", required = false) String title) {
-        //Logic to retrieve resource.
-        if (title != null && !title.trim().isEmpty()) {
-            return bookService.findAllBooksByTitleContaining(title);
-        }
-        return bookService.findAllBooks();
-    }
-
-    @GetMapping("/{id}")
-    @ResponseBody
-    public BookDTO readBookById(@PathVariable(name = "id") Long id) {
-        //Logic to retrieve resource.
-        Optional<Long> optionalId = Optional.ofNullable(id);
-
-        if (!optionalId.isPresent() || id == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PATH_VARIABLE_ID_IS_EXPECTED);
-        }
-
-        try {
-            return bookService.findBookById(id);
-        } catch (ResourceNotFound rnf) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, rnf.getMessage(), rnf);
-        }
-    }
-
 
     /**
      * Uploads the image to the server.
@@ -98,6 +71,33 @@ public class BookController {
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+        }
+    }
+
+    @GetMapping
+    @ResponseBody
+    public Collection<BookDTO> readAllBooks(@RequestParam(value = "all-by-title", required = false) String title) {
+        //Call to service to retrieve resource.
+        if (title != null && !title.trim().isEmpty()) {
+            return bookService.findAllBooksByTitleContaining(title);
+        }
+        return bookService.findAllBooks();
+    }
+
+    @GetMapping("/{id}")
+    @ResponseBody
+    public BookDTO readBookById(@PathVariable(name = "id") Long id) {
+        //Call to service to retrieve resource.
+        Optional<Long> optionalId = Optional.ofNullable(id);
+
+        if (!optionalId.isPresent() || id == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PATH_VARIABLE_ID_IS_EXPECTED);
+        }
+
+        try {
+            return bookService.findBookById(id);
+        } catch (ResourceNotFound rnf) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, rnf.getMessage(), rnf);
         }
     }
 

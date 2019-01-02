@@ -13,7 +13,7 @@ public class Constants {
     public static final String[] PUBLIC_MATCHERS = {
             "/css/**",
             "/js/**",
-            "/image/**",
+            "/static/**",
             "/book/**",
             "/user/**"
     };
