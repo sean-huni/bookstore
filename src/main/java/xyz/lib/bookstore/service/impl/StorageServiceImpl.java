@@ -6,8 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import xyz.lib.bookstore.config.StorageProperties;
-import xyz.lib.bookstore.dto.BookDTO;
-import xyz.lib.bookstore.exception.ResourceNotFound;
 import xyz.lib.bookstore.exception.StorageException;
 import xyz.lib.bookstore.exception.StorageFileNotFoundException;
 import xyz.lib.bookstore.service.BookService;
@@ -48,12 +46,10 @@ public class StorageServiceImpl implements StorageService {
      *
      * @param id        {@link xyz.lib.bookstore.model.Book}'s ID.
      * @param multipart {@link MultipartFile} to be uploaded.
-     * @throws ResourceNotFound when {@link xyz.lib.bookstore.model.Book}-ID is not found.
      * @throws IOException      caught if it fails to save the uploaded file-image.
      */
     @Override
-    public void uploadFile(Long id, MultipartFile multipart) throws ResourceNotFound, IOException {
-        final BookDTO bookDTO = bookService.findBookById(id);
+    public String uploadFile(Long id, MultipartFile multipart) throws IOException {
         String filename = id + ".png";
 
         if (multipart.isEmpty()) {
@@ -65,6 +61,12 @@ public class StorageServiceImpl implements StorageService {
             throw new StorageException("Cannot store file with relative path outside current directory " + filename);
         }
 
+        try {
+            deleteFile(id);
+        } catch (IOException se) {
+            LOGGER.warn(se.getMessage());
+        }
+
         try (InputStream inputStream = multipart.getInputStream()) {
             Files.copy(inputStream, this.rootLocation.resolve(filename),
                     StandardCopyOption.REPLACE_EXISTING);
@@ -74,31 +76,22 @@ public class StorageServiceImpl implements StorageService {
 
         LOGGER.info("File-Upload-Path: " + filePath);
 
-//        byte[] bytes = multipart.getBytes();
-//        try (BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File(filePath)))) {
-//            stream.write(bytes);
-//        }
-
-        bookDTO.setImgPath(filePath);
-        bookService.updateBook(bookDTO);
+        return filePath;
     }
 
     /**
      * Deletes both the file-path from the DB & directory.
      *
      * @param id {@link xyz.lib.bookstore.model.Book}
-     * @throws ResourceNotFound             thrown when {@link xyz.lib.bookstore.model.Book}-ID is not found in from the DB.
      * @throws IOException                  caught if it fails to delete the uploaded file-image.
      * @throws StorageFileNotFoundException when the file no longer exists on the server.
      */
     @Override
-    public void deleteFile(Long id) throws ResourceNotFound, IOException, StorageFileNotFoundException {
-        final String filename = id + ".png";
-        Files.delete(load(filename));
+    public void deleteFile(Long id) throws IOException {
+        String filename = id + ".png";
+        filename = "images/" + filename;
 
-        final BookDTO bookDTO = bookService.findBookById(id);
-        bookDTO.setImgPath(null);
-        bookService.updateBook(bookDTO);
+        Files.delete(load(filename));
     }
 
     private Path load(String filename) {

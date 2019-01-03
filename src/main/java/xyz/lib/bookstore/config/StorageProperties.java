@@ -4,6 +4,8 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.io.File;
 
+import static xyz.lib.bookstore.constants.Constants.RESOURCES_IMAGES;
+
 /**
  * PROJECT   : bookstore
  * PACKAGE   : xyz.lib.bookstore.config
@@ -19,7 +21,7 @@ public class StorageProperties {
     /**
      * Folder location for storing files
      */
-    private String location = new File("src/main/resources/static/").getAbsolutePath();
+    private String location = new File(RESOURCES_IMAGES).getAbsolutePath();
 
     public String getLocation() {
         return location;

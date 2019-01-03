@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,7 +15,9 @@ import xyz.lib.bookstore.exception.ResourceNotFound;
 import xyz.lib.bookstore.service.BookService;
 import xyz.lib.bookstore.service.StorageService;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -34,6 +37,8 @@ import static xyz.lib.bookstore.constants.Constants.PATH_VARIABLE_ID_IS_EXPECTED
 public class BookController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BookController.class);
     private BookService bookService;
+
+    @Resource
     private StorageService storageService;
 
     @Autowired
@@ -66,11 +71,15 @@ public class BookController {
     @ResponseBody
     public ResponseEntity<String> createBookImg(@PathVariable("id") Long id, @RequestParam("multipart") MultipartFile multipart) {
         try {
-            storageService.uploadFile(id, multipart);
+            final BookDTO bookDTO = bookService.findBookById(id);
+            String filePath = storageService.uploadFile(id, multipart);
+
+            bookDTO.setImgPath(filePath);
+            bookService.updateBook(bookDTO);
             return new ResponseEntity<>("Upload Successful!", HttpStatus.CREATED);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to upload image...");
         }
     }
 
@@ -115,9 +124,9 @@ public class BookController {
         return bookService.updateBook(bookDTO);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity deleteBookById(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<String> deleteBookById(@PathVariable(name = "id") Long id) {
         //Logic to delete resource.
         Optional<Long> optionalId = Optional.ofNullable(id);
 
@@ -125,8 +134,16 @@ public class BookController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PATH_VARIABLE_ID_IS_EXPECTED);
         }
 
+        try {
+            storageService.deleteFile(id);
+        } catch (IOException e) {
+            LOGGER.warn(e.getMessage(), e);
+        }
+
         bookService.deleteById(id);
-        return new ResponseEntity(HttpStatus.OK);
+
+        String resp = "{\"resp\": \"Book Deleted Successfully!!!\"}";
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
 }

@@ -81,7 +81,7 @@ public class BookstoreApplication {
         bookDTO.setPublisher("Disney");
         bookDTO.setDescription("Fictional characters based on the success of the Harry Potter Trilogy.");
         bookDTO.setFormat("hardcover");
-        bookDTO.setImgPath("/dev_0/proj/web/angular/v7/app/bookstore/src/main/resources/static/4.png");
+        bookDTO.setImgPath("/dev_0/proj/web/angular/v7/app/bookstore/src/main/resources/images/4.png");
         bookDTO.setPages(10);
         bookDTO.setIsbn("456-456-546465-5124-4");
         bookDTO.setLanguage("english");

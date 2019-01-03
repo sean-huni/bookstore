@@ -49,8 +49,10 @@ public class LoginController {
 
     @GetMapping("/checkSession")
     @ResponseBody
-    public ResponseEntity checkSession() {
-        return new ResponseEntity("Session Active!", HttpStatus.OK);
+    public ResponseEntity<String> checkSession() {
+        final String respMsg = "{\"resp\":\"Session Active!\"}";
+        LOGGER.info(respMsg);
+        return new ResponseEntity(respMsg, HttpStatus.OK);
     }
 
     @DeleteMapping("/login")
