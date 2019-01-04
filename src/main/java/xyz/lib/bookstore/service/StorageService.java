@@ -26,16 +26,14 @@ public interface StorageService {
      * @throws ResourceNotFound when {@link xyz.lib.bookstore.model.Book}-ID is not found.
      * @throws IOException      caught if it fails to save the uploaded file-image.
      */
-    void uploadFile(Long id, MultipartFile multipart) throws ResourceNotFound, IOException;
+    String uploadFile(Long id, MultipartFile multipart) throws ResourceNotFound, IOException;
 
 
     /**
      * Deletes both the file-path from the {@link xyz.lib.bookstore.model.Book} DB & directory.
      *
      * @param id {@link xyz.lib.bookstore.model.Book}
-     * @throws ResourceNotFound             thrown when {@link xyz.lib.bookstore.model.Book}-ID is not found in from the DB.
-     * @throws IOException                  caught if it fails to delete the uploaded file-image.
      * @throws StorageFileNotFoundException when the file no longer exists on the server.
      */
-    void deleteFile(Long id) throws ResourceNotFound, IOException, StorageFileNotFoundException;
+    void deleteFile(Long id) throws IOException;
 }

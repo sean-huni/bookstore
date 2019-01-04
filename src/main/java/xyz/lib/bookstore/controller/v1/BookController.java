@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,11 +15,14 @@ import xyz.lib.bookstore.exception.ResourceNotFound;
 import xyz.lib.bookstore.service.BookService;
 import xyz.lib.bookstore.service.StorageService;
 
+import javax.annotation.Resource;
 import javax.validation.Valid;
+import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
 
 import static xyz.lib.bookstore.constants.Constants.PATH_VARIABLE_ID_IS_EXPECTED;
+import static xyz.lib.bookstore.constants.Constants.RESP_JSON_FORMAT;
 
 /**
  * PROJECT   : bookstore
@@ -33,7 +37,11 @@ import static xyz.lib.bookstore.constants.Constants.PATH_VARIABLE_ID_IS_EXPECTED
 @RequestMapping("/v1/books")
 public class BookController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BookController.class);
+    private static final String MSG_BOOK_DELETED_SUCCESSFUL = "Book Deleted Successfully!!!";
+    private static final String MSG_BOOK_UPLOADED_SUCCESSFUL = "\"Image Uploaded Successfully!!!\"";
     private BookService bookService;
+
+    @Resource
     private StorageService storageService;
 
     @Autowired
@@ -49,37 +57,9 @@ public class BookController {
         try {
             return bookService.saveNewBook(book);
         } catch (BookConstraintViolationException ex) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
         }
     }
-
-    @GetMapping
-    @ResponseBody
-    public Collection<BookDTO> readAllBooks(@RequestParam(value = "all-by-title", required = false) String title) {
-        //Logic to retrieve resource.
-        if (title != null && !title.trim().isEmpty()) {
-            return bookService.findAllBooksByTitleContaining(title);
-        }
-        return bookService.findAllBooks();
-    }
-
-    @GetMapping("/{id}")
-    @ResponseBody
-    public BookDTO readBookById(@PathVariable(name = "id") Long id) {
-        //Logic to retrieve resource.
-        Optional<Long> optionalId = Optional.ofNullable(id);
-
-        if (!optionalId.isPresent() || id == 0) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PATH_VARIABLE_ID_IS_EXPECTED);
-        }
-
-        try {
-            return bookService.findBookById(id);
-        } catch (ResourceNotFound rnf) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, rnf.getMessage(), rnf);
-        }
-    }
-
 
     /**
      * Uploads the image to the server.
@@ -93,11 +73,44 @@ public class BookController {
     @ResponseBody
     public ResponseEntity<String> createBookImg(@PathVariable("id") Long id, @RequestParam("multipart") MultipartFile multipart) {
         try {
-            storageService.uploadFile(id, multipart);
-            return new ResponseEntity<>("Upload Successful!", HttpStatus.CREATED);
+            final BookDTO bookDTO = bookService.findBookById(id);
+            String filePath = storageService.uploadFile(id, multipart);
+
+            bookDTO.setImgPath(filePath);
+            bookService.updateBook(bookDTO);
+            String resp = String.format(RESP_JSON_FORMAT, MSG_BOOK_UPLOADED_SUCCESSFUL);
+
+            return new ResponseEntity<>(resp, HttpStatus.CREATED);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to upload image...");
+        }
+    }
+
+    @GetMapping
+    @ResponseBody
+    public Collection<BookDTO> readAllBooks(@RequestParam(value = "all-by-title", required = false) String title) {
+        //Call to service to retrieve resource.
+        if (title != null && !title.trim().isEmpty()) {
+            return bookService.findAllBooksByTitleContaining(title);
+        }
+        return bookService.findAllBooks();
+    }
+
+    @GetMapping("/{id}")
+    @ResponseBody
+    public BookDTO readBookById(@PathVariable(name = "id") Long id) {
+        //Call to service to retrieve resource.
+        Optional<Long> optionalId = Optional.ofNullable(id);
+
+        if (!optionalId.isPresent() || id == 0) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PATH_VARIABLE_ID_IS_EXPECTED);
+        }
+
+        try {
+            return bookService.findBookById(id);
+        } catch (ResourceNotFound rnf) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, rnf.getMessage(), rnf);
         }
     }
 
@@ -115,9 +128,9 @@ public class BookController {
         return bookService.updateBook(bookDTO);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
-    public ResponseEntity deleteBookById(@PathVariable(name = "id") Long id) {
+    public ResponseEntity<String> deleteBookById(@PathVariable(name = "id") Long id) {
         //Logic to delete resource.
         Optional<Long> optionalId = Optional.ofNullable(id);
 
@@ -125,8 +138,16 @@ public class BookController {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PATH_VARIABLE_ID_IS_EXPECTED);
         }
 
+        try {
+            storageService.deleteFile(id);
+        } catch (IOException e) {
+            LOGGER.warn(e.getMessage());
+        }
+
         bookService.deleteById(id);
-        return new ResponseEntity(HttpStatus.OK);
+
+        String resp = String.format(RESP_JSON_FORMAT, MSG_BOOK_DELETED_SUCCESSFUL);
+        return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 
 }

@@ -19,7 +19,7 @@ import javax.persistence.MappedSuperclass;
 public abstract class AbstractDO {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     public Long getId() {

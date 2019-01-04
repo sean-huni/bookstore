@@ -4,11 +4,15 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.http.CacheControl;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
 
 import java.util.Locale;
+import java.util.concurrent.TimeUnit;
 
 /**
  * PROJECT   : bookstore
@@ -20,7 +24,7 @@ import java.util.Locale;
  * CELL      : +27-64-906-8809
  */
 @Configuration
-public class MessageSourceConfig {
+public class WebConfig implements WebMvcConfigurer {
 
 
     @Bean
@@ -44,5 +48,21 @@ public class MessageSourceConfig {
         LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
         bean.setValidationMessageSource(messageSource());
         return bean;
+    }
+
+    /**
+     * Adds resource handlers.
+     *
+     * @param registry see {@link ResourceHandlerRegistry}
+     */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        final CacheControl cacheControl = CacheControl.empty()
+                .cachePrivate()
+                .sMaxAge(5, TimeUnit.SECONDS)
+                .mustRevalidate();
+
+        registry.addResourceHandler("/img/**")
+                .addResourceLocations("classpath:/images/").setCacheControl(cacheControl);
     }
 }
