@@ -22,6 +22,7 @@ import java.util.Collection;
 import java.util.Optional;
 
 import static xyz.lib.bookstore.constants.Constants.PATH_VARIABLE_ID_IS_EXPECTED;
+import static xyz.lib.bookstore.constants.Constants.RESP_JSON_FORMAT;
 
 /**
  * PROJECT   : bookstore
@@ -36,6 +37,8 @@ import static xyz.lib.bookstore.constants.Constants.PATH_VARIABLE_ID_IS_EXPECTED
 @RequestMapping("/v1/books")
 public class BookController {
     private static final Logger LOGGER = LoggerFactory.getLogger(BookController.class);
+    private static final String MSG_BOOK_DELETED_SUCCESSFUL = "Book Deleted Successfully!!!";
+    private static final String MSG_BOOK_UPLOADED_SUCCESSFUL = "\"Image Uploaded Successfully!!!\"";
     private BookService bookService;
 
     @Resource
@@ -52,10 +55,9 @@ public class BookController {
     public BookDTO createBook(@Valid @RequestBody BookDTO book) {
         //Logic to save a new book resource.
         try {
-            book.setId(null);
             return bookService.saveNewBook(book);
         } catch (BookConstraintViolationException ex) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage(), ex);
+            throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
         }
     }
 
@@ -76,7 +78,9 @@ public class BookController {
 
             bookDTO.setImgPath(filePath);
             bookService.updateBook(bookDTO);
-            return new ResponseEntity<>("Upload Successful!", HttpStatus.CREATED);
+            String resp = String.format(RESP_JSON_FORMAT, MSG_BOOK_UPLOADED_SUCCESSFUL);
+
+            return new ResponseEntity<>(resp, HttpStatus.CREATED);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to upload image...");
@@ -137,12 +141,12 @@ public class BookController {
         try {
             storageService.deleteFile(id);
         } catch (IOException e) {
-            LOGGER.warn(e.getMessage(), e);
+            LOGGER.warn(e.getMessage());
         }
 
         bookService.deleteById(id);
 
-        String resp = "{\"resp\": \"Book Deleted Successfully!!!\"}";
+        String resp = String.format(RESP_JSON_FORMAT, MSG_BOOK_DELETED_SUCCESSFUL);
         return new ResponseEntity<>(resp, HttpStatus.OK);
     }
 

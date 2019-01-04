@@ -2,16 +2,16 @@ package xyz.lib.bookstore.controller.v1;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import xyz.lib.bookstore.service.UserService;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.Collections;
+
+import static xyz.lib.bookstore.constants.Constants.RESP_JSON_FORMAT;
 
 /**
  * PROJECT   : bookstore
@@ -25,12 +25,10 @@ import java.util.Collections;
 @RestController
 public class LoginController {
     private static final Logger LOGGER = LoggerFactory.getLogger(LoginController.class);
-    private UserService userService;
+    private static final String SESSION_STATUS_ACTIVE = "Session Active!";
+    private static final String SESSION_STATUS_LOGOUT = "Logout Successful";
 
-    @Autowired
-    public LoginController(UserService userService) {
-        this.userService = userService;
-    }
+
 
     @PostMapping("/token")
     @ResponseBody
@@ -44,21 +42,22 @@ public class LoginController {
         LOGGER.info("Remote Host: {}", remoteHost);
         LOGGER.info("Remote Post: {}", remotePort);
         LOGGER.info("Remote Addr: {}", remoteAddr);
-        return new ResponseEntity(Collections.singletonMap("token", session.getId()), HttpStatus.OK);
+        return new ResponseEntity<>(Collections.singletonMap("token", session.getId()), HttpStatus.OK);
     }
 
     @GetMapping("/checkSession")
     @ResponseBody
     public ResponseEntity<String> checkSession() {
-        final String respMsg = "{\"resp\":\"Session Active!\"}";
+        final String respMsg = String.format(RESP_JSON_FORMAT, SESSION_STATUS_ACTIVE);
         LOGGER.info(respMsg);
-        return new ResponseEntity(respMsg, HttpStatus.OK);
+        return new ResponseEntity<>(respMsg, HttpStatus.OK);
     }
 
     @DeleteMapping("/login")
     @ResponseBody
-    public ResponseEntity logout(@RequestParam(value = "logout", required = false) Boolean logout){
+    public ResponseEntity logout(@RequestParam(value = "logout", required = false) Boolean logout) {
+        final String respMsg = String.format(RESP_JSON_FORMAT, SESSION_STATUS_LOGOUT);
         SecurityContextHolder.clearContext();
-        return new ResponseEntity("Logout Successfully!", HttpStatus.ACCEPTED);
+        return new ResponseEntity<>(respMsg, HttpStatus.ACCEPTED);
     }
 }
