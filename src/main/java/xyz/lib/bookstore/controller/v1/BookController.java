@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -50,6 +52,7 @@ public class BookController {
         this.storageService = storageService;
     }
 
+    @Secured({"ROLE_ADMIN"})
     @PostMapping
     @ResponseBody
     public BookDTO createBook(@Valid @RequestBody BookDTO book) {
@@ -69,6 +72,7 @@ public class BookController {
      * @param multipart {@link MultipartFile}
      * @return {@link HttpStatus} to indicate success/failure.
      */
+    @Secured({"ROLE_ADMIN"})
     @PostMapping(value = "/{id}/images")
     @ResponseBody
     public ResponseEntity<String> createBookImg(@PathVariable("id") Long id, @RequestParam("multipart") MultipartFile multipart) {
@@ -87,9 +91,11 @@ public class BookController {
         }
     }
 
+    @PreAuthorize("permitAll()")
     @GetMapping
     @ResponseBody
     public Collection<BookDTO> readAllBooks(@RequestParam(value = "all-by-title", required = false) String title) {
+        LOGGER.info("Title Search: " + title);
         //Call to service to retrieve resource.
         if (title != null && !title.trim().isEmpty()) {
             return bookService.findAllBooksByTitleContaining(title);
@@ -97,6 +103,7 @@ public class BookController {
         return bookService.findAllBooks();
     }
 
+    @Secured({"ROLE_ADMIN"})
     @GetMapping("/{id}")
     @ResponseBody
     public BookDTO readBookById(@PathVariable(name = "id") Long id) {
@@ -114,6 +121,7 @@ public class BookController {
         }
     }
 
+    @Secured({"ROLE_ADMIN"})
     @PutMapping("/{id}")
     @ResponseBody
     public BookDTO updateBookById(@PathVariable(name = "id") Long id, @Valid @RequestBody BookDTO bookDTO) {
@@ -128,6 +136,7 @@ public class BookController {
         return bookService.updateBook(bookDTO);
     }
 
+    @Secured({"ROLE_ADMIN"})
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     @ResponseBody
     public ResponseEntity<String> deleteBookById(@PathVariable(name = "id") Long id) {

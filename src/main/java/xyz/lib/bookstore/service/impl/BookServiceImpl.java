@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import xyz.lib.bookstore.convertor.book.BookDOConverter;
 import xyz.lib.bookstore.convertor.book.BookDTOConverter;
 import xyz.lib.bookstore.dto.BookDTO;
-import xyz.lib.bookstore.exception.BookConstraintViolationException;
 import xyz.lib.bookstore.exception.ResourceNotFound;
 import xyz.lib.bookstore.model.Book;
 import xyz.lib.bookstore.repo.BookRepo;
@@ -80,12 +79,7 @@ public class BookServiceImpl implements BookService {
      * @return saved book.
      */
     @Override
-    public BookDTO saveNewBook(BookDTO newBook) throws BookConstraintViolationException {
-        // throws Caused by: java.lang.IllegalArgumentException: The given id must not be null!
-//        if (bookRepo.findById(newBook.getId()).isPresent()) {
-//            throw new BookConstraintViolationException("Cannot save a new book. A Book with id: " + newBook.getId() + " already exists.");
-//        }
-
+    public BookDTO saveNewBook(BookDTO newBook) {
         newBook.setId(null);
         Book book = bookDOConverter.convert(newBook);
         return bookDTOConverter.convert(bookRepo.save(book));

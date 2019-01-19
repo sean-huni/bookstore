@@ -7,6 +7,7 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.http.CacheControl;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.LocaleResolver;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import org.springframework.web.servlet.i18n.SessionLocaleResolver;
@@ -64,5 +65,10 @@ public class WebConfig implements WebMvcConfigurer {
 
         registry.addResourceHandler("/img/**")
                 .addResourceLocations("classpath:/images/").setCacheControl(cacheControl);
+    }
+
+    @Override
+    public void addCorsMappings(CorsRegistry registry) {
+        registry.addMapping("/**");
     }
 }
