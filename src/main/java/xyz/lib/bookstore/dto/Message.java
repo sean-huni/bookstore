@@ -13,10 +13,10 @@ import xyz.lib.bookstore.enums.Action;
  */
 public class Message {
     private User user;
-    private Message message;
+    private String message;
     private Action action;
 
-    public Message(User user, Message message, Action action) {
+    public Message(User user, String message, Action action) {
         this.user = user;
         this.message = message;
         this.action = action;
@@ -30,11 +30,11 @@ public class Message {
         this.user = user;
     }
 
-    public Message getMessage() {
+    public String getMessage() {
         return message;
     }
 
-    public void setMessage(Message message) {
+    public void setMessage(String message) {
         this.message = message;
     }
 

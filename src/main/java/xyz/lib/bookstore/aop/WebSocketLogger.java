@@ -36,7 +36,7 @@ public class WebSocketLogger {
     @Before("onConnectPointCut()")
     private void logBeforeConnection(JoinPoint joinPoint) {
         LOGGER.info("Before Connection...");
-        log(joinPoint);
+        this.log(joinPoint);
 
         for (Object arg : joinPoint.getArgs()) {
             if (arg instanceof SessionConnectedEvent) {
