@@ -20,25 +20,31 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
  */
 @Configuration
 @EnableWebSocketMessageBroker
+
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
+    private static final String STOMP_ENDPOINT = "/stomp-endpoint";
+    private static final String SIMPLE_BROKER[] = {"/topic"};
+    private static final String DEST_PREFIX = "/room";
 
     @Override
     public void registerStompEndpoints(StompEndpointRegistry stompEndpointRegistry) {
-        stompEndpointRegistry.addEndpoint("/socket.io").withSockJS();
+        stompEndpointRegistry.addEndpoint(STOMP_ENDPOINT)
+                .setAllowedOrigins("http://localhost:4201").withSockJS();
     }
 
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.setApplicationDestinationPrefixes("/app");
-        registry.enableSimpleBroker("/chat");
+        registry.enableSimpleBroker(SIMPLE_BROKER);
+        registry.setApplicationDestinationPrefixes(DEST_PREFIX, "connect", "disconnect");
     }
 
     @EventListener
     public void onSocketConnected(SessionConnectedEvent event) {
+        // Intercepted in AOP for logging.
     }
 
     @EventListener
     public void onSocketDisconnected(SessionDisconnectEvent event) {
-        // Intercepted in the Aspect for logging.
+        // Intercepted in AOP for logging.
     }
 }
