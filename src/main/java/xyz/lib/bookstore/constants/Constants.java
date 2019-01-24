@@ -14,8 +14,10 @@ public class Constants {
             "/css/**",
             "/js/**",
             "/static/**",
-            "/book/**",
-            "/user/**"
+            "/books/**",
+            "/user/**",
+            "http://localhost:4201",
+            "ws://**"
     };
 
     public static final String PATH_VARIABLE_ID_IS_EXPECTED = "Book ID cannot be null or zero. PathVariable 'id' is expected.";

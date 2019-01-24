@@ -22,3 +22,12 @@ server:
 spring:
   session:
     store-type: redis
+
+---
+spring:
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: admin
+    password: admin
+    addresses: amqp://localhost:5672/

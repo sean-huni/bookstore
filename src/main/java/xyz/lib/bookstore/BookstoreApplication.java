@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.scheduling.annotation.EnableAsync;
 import xyz.lib.bookstore.config.EncryptionConfig;
 import xyz.lib.bookstore.config.StorageProperties;
 import xyz.lib.bookstore.dto.BookDTO;
@@ -22,8 +23,10 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
+//prefix = "raw", ignoreUnknownFields = false
 @SpringBootApplication
-@EnableConfigurationProperties(StorageProperties.class)
+@EnableConfigurationProperties({StorageProperties.class})
+@EnableAsync(proxyTargetClass=true)
 public class BookstoreApplication {
     private static final Logger LOGGER = LoggerFactory.getLogger(BookstoreApplication.class);
     private UserService userService;

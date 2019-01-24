@@ -22,6 +22,7 @@ import org.springframework.web.context.WebApplicationContext;
 import xyz.lib.bookstore.dto.BookDTO;
 import xyz.lib.bookstore.enums.CategoryEnum;
 import xyz.lib.bookstore.enums.FormatEnum;
+import xyz.lib.bookstore.util.AuthenticationUtil;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -144,7 +145,7 @@ public class BookIntegrationTest {
     }
 
     @Test
-    public void dGivenBookId_whenUpdatingBook_thenSuccess() throws Exception {
+    public void eGivenBookId_whenUpdatingBook_thenSuccess() throws Exception {
         final Gson gson = new GsonBuilder().setDateFormat("yyyy-MM-dd").create();
         BookDTO bookDTO = new BookDTO();
         newTestBook(bookDTO);
@@ -170,7 +171,29 @@ public class BookIntegrationTest {
     }
 
     @Test
-    public void eGivenBookIdAndImgFile_whenUploadingImg_thenSuccess() throws Exception {
+    public void dGivenBookTitle_whenSearchingBookTitleByParam_thenSuccess() throws Exception {
+//
+        try {
+            AuthenticationUtil.configureAuthentication("ANONYMOUS");
+            mockMvc.perform(get("/v1/books?all-by-title=OOP")
+                    .contentType("application/json;charset=UTF-8"))
+                    .andDo(print())
+                    .andExpect(status().is2xxSuccessful())
+                    .andExpect(jsonPath("$").isArray())
+                    .andExpect(jsonPath("$[0]").isNotEmpty())
+                    .andExpect(jsonPath("$[0].id").isNumber())
+                    .andExpect(jsonPath("$[0].id").value(5))
+                    .andExpect(jsonPath("$[0].title").value("OOP Java"));
+
+        } finally {
+            AuthenticationUtil.clearAuthentication();
+        }
+
+
+    }
+
+    @Test
+    public void fGivenBookIdAndImgFile_whenUploadingImg_thenSuccess() throws Exception {
         // Mock Request
         File file = new File("/home/sean/Pictures/a5.png");
         BufferedInputStream inputStream = new BufferedInputStream(new FileInputStream(file));
@@ -189,7 +212,7 @@ public class BookIntegrationTest {
     }
 
     @Test
-    public void fGivenBookId_whenDeleteBook_thenSuccess() throws Exception {
+    public void gGivenBookId_whenDeleteBook_thenSuccess() throws Exception {
         mockMvc.perform(delete("/v1/books/" + testID)
                 .contentType("application/json;charset=UTF-8"))
                 .andDo(print())
