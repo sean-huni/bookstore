@@ -20,10 +20,9 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
  */
 @Configuration
 @EnableWebSocketMessageBroker
-
 public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
-    private static final String STOMP_ENDPOINT = "/stomp-endpoint";
-    private static final String SIMPLE_BROKER[] = {"/topic"};
+    private static final String STOMP_ENDPOINT = "/websocket";
+    private static final String[] SIMPLE_BROKER = {"/topic"};
     private static final String DEST_PREFIX = "/room";
 
     @Override
