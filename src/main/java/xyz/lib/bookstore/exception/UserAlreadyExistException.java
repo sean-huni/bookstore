@@ -20,7 +20,7 @@ public class UserAlreadyExistException extends AuthenticationException {
     /**
      * User Already Exist Exception
      *
-     * @param msg {@link String} Error Message.
+     * @param msg {@link String} Error From.
      */
     public UserAlreadyExistException(String msg) {
         super(msg);

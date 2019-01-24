@@ -1,5 +1,7 @@
 package xyz.lib.bookstore.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.io.Serializable;
 
 /**
@@ -14,6 +16,8 @@ import java.io.Serializable;
 
 public abstract class AbstractDTO implements Serializable {
     private static final Long serialVersionUID = 3455534529382937L;
+
+    @JsonProperty("id")
     private Long id;
 
     public Long getId() {
