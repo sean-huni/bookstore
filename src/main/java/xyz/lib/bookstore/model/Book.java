@@ -1,7 +1,8 @@
 package xyz.lib.bookstore.model;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.Objects;
@@ -15,8 +16,12 @@ import java.util.Objects;
  * E-MAIL    : kudzai@bcs.org
  * CELL      : +27-64-906-8809
  */
-@Entity
+
+@Document(collection = "book")
 public class Book extends AbstractDO {
+
+    @Transient
+    public static final String SEQUENCE_NAME = "book_sequence";
 
     private String title;
     private String author;
@@ -31,7 +36,6 @@ public class Book extends AbstractDO {
     private BigDecimal listPrice;
     private BigDecimal ourPrice;
     private Boolean active;
-    @Column(columnDefinition = "text")
     private String description;
     private Integer quantity;
     private String imgPath;
@@ -190,5 +194,27 @@ public class Book extends AbstractDO {
     @Override
     public int hashCode() {
         return Objects.hash(getTitle(), getAuthor(), getPublisher(), getDatePublished(), getLanguage(), getCategory(), getPages(), getFormat(), getIsbn(), getWeight(), getListPrice(), getOurPrice(), active, getDescription(), getQuantity(), getImgPath());
+    }
+
+    @Override
+    public String toString() {
+        return "Book{" +
+                "title='" + title + '\'' +
+                ", author='" + author + '\'' +
+                ", publisher='" + publisher + '\'' +
+                ", datePublished=" + datePublished +
+                ", language='" + language + '\'' +
+                ", category='" + category + '\'' +
+                ", pages=" + pages +
+                ", format='" + format + '\'' +
+                ", isbn='" + isbn + '\'' +
+                ", weight=" + weight +
+                ", listPrice=" + listPrice +
+                ", ourPrice=" + ourPrice +
+                ", active=" + active +
+                ", description='" + description + '\'' +
+                ", quantity=" + quantity +
+                ", imgPath='" + imgPath + '\'' +
+                '}';
     }
 }

@@ -10,9 +10,6 @@ import xyz.lib.bookstore.exception.RoleAllocationException;
 import xyz.lib.bookstore.model.User;
 import xyz.lib.bookstore.model.UserRole;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.OneToMany;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,7 +33,6 @@ public class UserDOConverter implements Converter<User, UserDTO> {
     private String name, surname, email, username, password;
     private Boolean isEnabled = true;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore
     private Set<UserRole> userRoles = new HashSet<>();
 

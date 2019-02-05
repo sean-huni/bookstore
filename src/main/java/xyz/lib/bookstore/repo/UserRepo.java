@@ -1,8 +1,9 @@
 package xyz.lib.bookstore.repo;
 
-import xyz.lib.bookstore.model.User;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Mono;
+import xyz.lib.bookstore.model.User;
 
 /**
  * PROJECT   : bookstore
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Repository;
  * CELL      : +27-64-906-8809
  */
 @Repository
-public interface UserRepo extends JpaRepository<User, Long> {
-    User findByUsername(String username);
-    User findByEmail(String email);
+public interface UserRepo extends ReactiveMongoRepository<User, Long> {
+    Mono<User> findByUsername(String username);
+    Mono<User> findByEmail(String email);
 }

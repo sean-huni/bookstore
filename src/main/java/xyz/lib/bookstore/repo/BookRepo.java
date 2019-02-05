@@ -1,10 +1,9 @@
 package xyz.lib.bookstore.repo;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import xyz.lib.bookstore.model.Book;
-
-import java.util.Collection;
 
 /**
  * PROJECT   : bookstore
@@ -16,10 +15,10 @@ import java.util.Collection;
  * CELL      : +27-64-906-8809
  */
 @Repository
-public interface BookRepo extends JpaRepository<Book, Long> {
-    Book findBookByTitle(String title);
+public interface BookRepo extends ReactiveMongoRepository<Book, Long> {
+    Flux<Book> findBookByTitle(String title);
 
-    Collection<Book> findAllByTitleContaining(String keyword);
+    Flux<Book> findAllByTitleContaining(String keyword);
 
-    Collection<Book> findAllByAuthorContains(String author);
+    Flux<Book> findAllByAuthorContains(String author);
 }

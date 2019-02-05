@@ -1,21 +1,33 @@
 spring:
-  datasource:
-    url: jdbc:mariadb://localhost:3306/bookstoreapi
-    username: root
-#    password: password
-    driver-class-name: org.mariadb.jdbc.Driver
-    data: classpath:data/init-data.sql
-  jpa:
-    show-sql: true
-    hibernate:
-      ddl-auto: create-drop
-    properties:
-      hibernate:
-          dialect: org.hibernate.dialect.MySQL5Dialect
+#  data:
+#    neo4j:
+#      uri: bolt://localhost:7687/
+#      embedded:
+#        enabled: true
+#      repositories:
+#        enabled: true
+#      username: neo4j
+#      password: neo4spring_cloud
+#  jpa:
+#    show-sql: true
+#    hibernate:
+#      ddl-auto: create-drop
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.MySQL5Dialect
 
+  data:
+    mongodb:
+      database: bookstore
 
 ---
-
+spring:
+  jackson:
+    serialization:
+      INDENT_OUTPUT: true
+  main:
+    allow-bean-definition-overriding: true
+---
 server:
   port: 8181
 

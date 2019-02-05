@@ -51,11 +51,11 @@ public class UserServiceImpl implements UserService {
             throw new UserAlreadyExistException("Username is empty/null.");
         }
 
-        Optional<User> localUser = Optional.ofNullable(userRepo.findByUsername(user.getUsername()));
+        Optional<User> localUser = userRepo.findByUsername(user.getUsername()).blockOptional();
 
-        if (!localUser.isPresent()) {
+        if (localUser.isEmpty()) {
             user.getUserRoles().addAll(userRoles);
-            localUser = Optional.ofNullable(userRepo.save(user));
+            localUser = userRepo.save(user).blockOptional();
         } else {
             LOGGER.warn("Username {} already exists...", Objects.requireNonNull(localUser.orElse(null)).getUsername());
             throw new UserAlreadyExistException("Username: " + user.getUsername() + " already exist.");

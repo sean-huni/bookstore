@@ -1,10 +1,8 @@
 package xyz.lib.bookstore.model;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-
-import javax.persistence.*;
-import java.io.Serializable;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 /**
  * PROJECT   : bookstore
@@ -16,17 +14,14 @@ import java.io.Serializable;
  * CELL      : +27-64-906-8809
  */
 
-@Entity
-@Table(name = "user_role")
-public class UserRole extends AbstractDO implements Serializable {
-    @Getter(AccessLevel.NONE)
-    private static final Long serialVersionUID = 234894724873L;
+@Document(collection = "user_role")
+public class UserRole extends AbstractDO {
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
+    @Transient
+    public static final String SEQUENCE_NAME = "user_role_sequence";
+    @DBRef
     private User user;
-
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @DBRef
     private Role role;
 
     public User getUser() {

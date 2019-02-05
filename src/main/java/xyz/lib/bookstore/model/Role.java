@@ -1,6 +1,11 @@
 package xyz.lib.bookstore.model;
 
-import javax.persistence.*;
+import io.github.kaiso.relmongo.annotation.CascadeType;
+import io.github.kaiso.relmongo.annotation.FetchType;
+import io.github.kaiso.relmongo.annotation.OneToMany;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
@@ -15,15 +20,17 @@ import java.util.Set;
  * CELL      : +27-64-906-8809
  */
 
-@Entity
-@Table(name = "role")
+@Document("role")
 public class Role extends AbstractDO implements Serializable {
+    @Transient
     private static final Long serialVersionUID = 3454225534529382937L;
 
-    private String name;
-    @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<UserRole> userRoles = new HashSet<>();
+    @Transient
+    public static final String SEQUENCE_NAME = "role_sequence";
 
+    private String name;
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private Set<UserRole> userRoles = new HashSet<>();
 
     public String getName() {
         return name;
@@ -39,5 +46,13 @@ public class Role extends AbstractDO implements Serializable {
 
     public void setUserRoles(Set<UserRole> userRoles) {
         this.userRoles = userRoles;
+    }
+
+    @Override
+    public String toString() {
+        return "Role{" +
+                "name='" + name + '\'' +
+                ", userRoles=" + userRoles +
+                '}';
     }
 }

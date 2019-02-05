@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 import xyz.lib.bookstore.config.StorageProperties;
 import xyz.lib.bookstore.exception.StorageException;
 import xyz.lib.bookstore.exception.StorageFileNotFoundException;
@@ -46,14 +47,14 @@ public class StorageServiceImpl implements StorageService {
      *
      * @param id        {@link xyz.lib.bookstore.model.Book}'s ID.
      * @param multipart {@link MultipartFile} to be uploaded.
-     * @throws IOException      caught if it fails to save the uploaded file-image.
+     * @throws IOException caught if it fails to save the uploaded file-image.
      */
     @Override
-    public String uploadFile(Long id, MultipartFile multipart) throws IOException {
+    public Mono<String> uploadFile(Long id, MultipartFile multipart) throws IOException {
         String filename = id + ".png";
 
         if (multipart.isEmpty()) {
-            throw new StorageException("Failed to store empty file " + filename);
+            throw new StorageException("Cannot store empty file " + filename);
         }
 
         if (filename.contains("..")) {
@@ -64,7 +65,7 @@ public class StorageServiceImpl implements StorageService {
         try {
             deleteFile(id);
         } catch (IOException se) {
-            LOGGER.warn(se.getMessage());
+            LOGGER.warn("\nUser id: {}. Msg: {}", id, se.getMessage());
         }
 
         try (InputStream inputStream = multipart.getInputStream()) {
@@ -74,9 +75,9 @@ public class StorageServiceImpl implements StorageService {
 
         final String filePath = rootLocation.toAbsolutePath().toString() + FOLDER_SEPARATOR + filename;
 
-        LOGGER.info("File-Upload-Path: " + filePath);
+        LOGGER.info("File-Upload-Path: {}", filePath);
 
-        return filePath;
+        return Mono.just(filePath);
     }
 
     /**
@@ -87,11 +88,13 @@ public class StorageServiceImpl implements StorageService {
      * @throws StorageFileNotFoundException when the file no longer exists on the server.
      */
     @Override
-    public void deleteFile(Long id) throws IOException {
+    public Mono<Void> deleteFile(Long id) throws IOException {
         String filename = id + ".png";
         filename = "images/" + filename;
 
         Files.delete(load(filename));
+
+        return Mono.empty();
     }
 
     private Path load(String filename) {

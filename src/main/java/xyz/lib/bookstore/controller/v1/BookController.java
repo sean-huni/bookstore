@@ -1,7 +1,6 @@
 package xyz.lib.bookstore.controller.v1;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -11,8 +10,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import xyz.lib.bookstore.dto.BookDTO;
-import xyz.lib.bookstore.exception.BookConstraintViolationException;
 import xyz.lib.bookstore.exception.ResourceNotFound;
 import xyz.lib.bookstore.service.BookService;
 import xyz.lib.bookstore.service.StorageService;
@@ -20,7 +20,6 @@ import xyz.lib.bookstore.service.StorageService;
 import javax.annotation.Resource;
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Optional;
 
 import static xyz.lib.bookstore.constants.Constants.PATH_VARIABLE_ID_IS_EXPECTED;
@@ -35,10 +34,10 @@ import static xyz.lib.bookstore.constants.Constants.RESP_JSON_FORMAT;
  * E-MAIL    : kudzai@bcs.org
  * CELL      : +27-64-906-8809
  */
+@Slf4j
 @RestController
 @RequestMapping("/v1/books")
 public class BookController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(BookController.class);
     private static final String MSG_BOOK_DELETED_SUCCESSFUL = "Book Deleted Successfully!!!";
     private static final String MSG_BOOK_UPLOADED_SUCCESSFUL = "\"Image Uploaded Successfully!!!\"";
     private BookService bookService;
@@ -54,14 +53,10 @@ public class BookController {
 
     @Secured({"ROLE_ADMIN"})
     @PostMapping
-    @ResponseBody
-    public BookDTO createBook(@Valid @RequestBody BookDTO book) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<BookDTO> createBook(@Valid @RequestBody BookDTO book) {
         //Logic to save a new book resource.
-        try {
-            return bookService.saveNewBook(book);
-        } catch (BookConstraintViolationException ex) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, ex.getMessage());
-        }
+        return bookService.saveNewBook(book);
     }
 
     /**
@@ -75,27 +70,30 @@ public class BookController {
     @Secured({"ROLE_ADMIN"})
     @PostMapping(value = "/{id}/images")
     @ResponseBody
-    public ResponseEntity<String> createBookImg(@PathVariable("id") Long id, @RequestParam("multipart") MultipartFile multipart) {
+    @ResponseStatus(HttpStatus.CREATED)
+    public Mono<String> createBookImg(@PathVariable("id") Long id, @RequestParam("multipart") MultipartFile multipart) {
+        final BookDTO bookDTO = bookService.findBookById(id).block();
+        Optional<String> filePath = null;
+
         try {
-            final BookDTO bookDTO = bookService.findBookById(id);
-            String filePath = storageService.uploadFile(id, multipart);
-
-            bookDTO.setImgPath(filePath);
-            bookService.updateBook(bookDTO);
-            String resp = String.format(RESP_JSON_FORMAT, MSG_BOOK_UPLOADED_SUCCESSFUL);
-
-            return new ResponseEntity<>(resp, HttpStatus.CREATED);
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Failed to upload image...");
+            filePath = storageService.uploadFile(id, multipart).blockOptional();
+        } catch (IOException e) {
+            log.error(e.getMessage());
+            throw new ResponseStatusException(HttpStatus.BAD_GATEWAY, e.getMessage());
         }
+
+        bookDTO.setImgPath(filePath.get());
+        bookService.updateBook(bookDTO);
+        String resp = String.format(RESP_JSON_FORMAT, MSG_BOOK_UPLOADED_SUCCESSFUL);
+
+        return Mono.just(resp);
     }
 
     @PreAuthorize("permitAll()")
     @GetMapping
     @ResponseBody
-    public Collection<BookDTO> readAllBooks(@RequestParam(value = "all-by-title", required = false) String title) {
-        LOGGER.info("Title Search: " + title);
+    public Flux<BookDTO> readAllBooks(@RequestParam(value = "all-by-title", required = false) String title) {
+        log.info("Title Search: " + title);
         //Call to service to retrieve resource.
         if (title != null && !title.trim().isEmpty()) {
             return bookService.findAllBooksByTitleContaining(title);
@@ -106,7 +104,7 @@ public class BookController {
     @Secured({"ROLE_ADMIN"})
     @GetMapping("/{id}")
     @ResponseBody
-    public BookDTO readBookById(@PathVariable(name = "id") Long id) {
+    public Mono<BookDTO> readBookById(@PathVariable(name = "id") Long id) {
         //Call to service to retrieve resource.
         Optional<Long> optionalId = Optional.ofNullable(id);
 
@@ -123,12 +121,12 @@ public class BookController {
 
     @Secured({"ROLE_ADMIN"})
     @PutMapping("/{id}")
-    @ResponseBody
-    public BookDTO updateBookById(@PathVariable(name = "id") Long id, @Valid @RequestBody BookDTO bookDTO) {
+    @ResponseBody @ResponseStatus(HttpStatus.OK)
+    public Mono<BookDTO> updateBookById(@PathVariable(name = "id") Long id, @Valid @RequestBody BookDTO bookDTO) {
         //Logic to update resource.
         Optional<Long> optionalId = Optional.ofNullable(id);
 
-        if (!optionalId.isPresent() || id == 0) {
+        if (!optionalId.isPresent() || id == 0L) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, PATH_VARIABLE_ID_IS_EXPECTED);
         }
 
@@ -138,8 +136,8 @@ public class BookController {
 
     @Secured({"ROLE_ADMIN"})
     @DeleteMapping(value = "/{id}", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    @ResponseBody
-    public ResponseEntity<String> deleteBookById(@PathVariable(name = "id") Long id) {
+    @ResponseBody @ResponseStatus(HttpStatus.OK)
+    public Mono<ResponseEntity<String>> deleteBookById(@PathVariable(name = "id") Long id) {
         //Logic to delete resource.
         Optional<Long> optionalId = Optional.ofNullable(id);
 
@@ -150,13 +148,13 @@ public class BookController {
         try {
             storageService.deleteFile(id);
         } catch (IOException e) {
-            LOGGER.warn(e.getMessage());
+            log.warn(e.getMessage());
         }
 
         bookService.deleteById(id);
 
         String resp = String.format(RESP_JSON_FORMAT, MSG_BOOK_DELETED_SUCCESSFUL);
-        return new ResponseEntity<>(resp, HttpStatus.OK);
+        return Mono.just(new ResponseEntity<>(resp, HttpStatus.OK));
     }
 
 }

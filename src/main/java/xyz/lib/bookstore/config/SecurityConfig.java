@@ -4,14 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.session.web.http.HeaderHttpSessionStrategy;
-import org.springframework.session.web.http.HttpSessionStrategy;
-import xyz.lib.bookstore.service.impl.UserDetailsServiceImpl;
+import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
+import org.springframework.security.config.web.server.ServerHttpSecurity;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.server.SecurityWebFilterChain;
+import org.springframework.security.web.server.context.WebSessionServerSecurityContextRepository;
+import org.springframework.session.ReactiveMapSessionRepository;
+import org.springframework.session.ReactiveSessionRepository;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 import static xyz.lib.bookstore.constants.Constants.PUBLIC_MATCHERS;
 
@@ -25,33 +27,38 @@ import static xyz.lib.bookstore.constants.Constants.PUBLIC_MATCHERS;
  * CELL      : +27-64-906-8809
  */
 @Configuration
-@EnableWebSecurity
+@EnableWebFluxSecurity
+//@EnableSpringWebSession
 @EnableGlobalMethodSecurity(prePostEnabled = true)
-public class SecurityConfig extends WebSecurityConfigurerAdapter {
-    private UserDetailsServiceImpl userSecurityServiceImpl;
+public class SecurityConfig {
     private EncryptionConfig encryptionConfig;
 
     @Autowired
-    public SecurityConfig(EncryptionConfig encryptionConfig, UserDetailsServiceImpl userSecurityServiceImpl) {
+    public SecurityConfig(EncryptionConfig encryptionConfig) {
         this.encryptionConfig = encryptionConfig;
-        this.userSecurityServiceImpl = userSecurityServiceImpl;
     }
 
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http.csrf().disable().cors().disable().httpBasic()
-                .and().authorizeRequests().antMatchers(PUBLIC_MATCHERS).permitAll()
-                .and().authorizeRequests().antMatchers(HttpMethod.GET, "/v1/books").permitAll()
-                .anyRequest().authenticated();
-    }
+    // @formatter:off
+    @Bean
+    public SecurityWebFilterChain springSecurityFilterChain(ServerHttpSecurity http) {
+        http
+                .csrf().disable()
+                .cors().disable()
+                .httpBasic().securityContextRepository(new WebSessionServerSecurityContextRepository())
+                .and().authorizeExchange().pathMatchers(PUBLIC_MATCHERS).permitAll()
+                .and().authorizeExchange().pathMatchers(HttpMethod.GET, "/v1/books").permitAll();
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userSecurityServiceImpl).passwordEncoder(encryptionConfig.passwordEncoder());
+        return http.build();
+    }
+    // @formatter:on
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return encryptionConfig.passwordEncoder();
     }
 
     @Bean
-    public HttpSessionStrategy httpSessionStrategy() {
-        return new HeaderHttpSessionStrategy();
+    public ReactiveSessionRepository httpSessionStrategy() {
+        return new ReactiveMapSessionRepository(new ConcurrentHashMap<>());
     }
 }

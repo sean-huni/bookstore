@@ -138,7 +138,7 @@ public class BookIntegrationTest {
         final BookDTO bookDTOResp = gson.fromJson(resp, BookDTO.class);
 
         assertNotNull("Must return the id of the book", bookDTOResp.getId());
-        assertTrue("ID of the book must be a positive integer.", bookDTOResp.getId() > 0);
+        assertTrue("ID of the book must be a positive Long.", bookDTOResp.getId() > 0);
 
         testID = bookDTOResp.getId();
         LOGGER.info("Resp CREATE-TEST-ID: " + testID);
@@ -182,7 +182,7 @@ public class BookIntegrationTest {
                     .andExpect(jsonPath("$").isArray())
                     .andExpect(jsonPath("$[0]").isNotEmpty())
                     .andExpect(jsonPath("$[0].id").isNumber())
-                    .andExpect(jsonPath("$[0].id").value(5))
+                    .andExpect(jsonPath("$[0].id").value(testID))
                     .andExpect(jsonPath("$[0].title").value("OOP Java"));
 
         } finally {

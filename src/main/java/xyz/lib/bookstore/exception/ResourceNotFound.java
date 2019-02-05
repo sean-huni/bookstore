@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * CELL      : +27-64-906-8809
  */
 @ResponseStatus(value = HttpStatus.NOT_FOUND, reason = "Resource not found.")
-public class ResourceNotFound extends Exception {
+public class ResourceNotFound extends RuntimeException {
     /**
      * Constructs a new exception with the specified detail message.  The
      * cause is not initialized, and may subsequently be initialized by

@@ -1,11 +1,15 @@
 package xyz.lib.bookstore.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.github.kaiso.relmongo.annotation.CascadeType;
+import io.github.kaiso.relmongo.annotation.FetchType;
+import io.github.kaiso.relmongo.annotation.OneToMany;
+import org.springframework.data.annotation.Transient;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.redis.core.index.Indexed;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import xyz.lib.bookstore.security.Authority;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.HashSet;
@@ -21,21 +25,22 @@ import java.util.Set;
  * CELL      : +27-64-906-8809
  */
 
-@Entity
-@Table(name = "user")
-public class User implements UserDetails, Serializable {
+@Document(collection = "user")
+public class User extends AbstractDO implements UserDetails, Serializable {
+    @Transient
     public static final Long serialVersionUID = 28372642376L;
+    @Transient
+    public static final String SEQUENCE_NAME = "user_sequence";
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "id", nullable = false, updatable = false)
-    private Long id;
-
-    private String name, surname, email, username, password;
+    private String name;
+    private String surname;
+    private String email;
+    @Indexed
+    private String username;
+    private String password;
     private Boolean isEnabled = true;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JsonIgnore
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<UserRole> userRoles = new HashSet<>();
 
     public User() {
@@ -64,9 +69,17 @@ public class User implements UserDetails, Serializable {
         return password;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public String getUsername() {
         return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Override
@@ -89,12 +102,8 @@ public class User implements UserDetails, Serializable {
         return isEnabled;
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
+    public void setEnabled(Boolean enabled) {
+        isEnabled = enabled;
     }
 
     public String getName() {
@@ -121,23 +130,24 @@ public class User implements UserDetails, Serializable {
         this.email = email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public void setEnabled(Boolean enabled) {
-        isEnabled = enabled;
-    }
-
     public Set<UserRole> getUserRoles() {
         return userRoles;
     }
 
     public void setUserRoles(Set<UserRole> userRoles) {
         this.userRoles = userRoles;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", email='" + email + '\'' +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", isEnabled=" + isEnabled +
+                ", userRoles=" + userRoles +
+                '}';
     }
 }

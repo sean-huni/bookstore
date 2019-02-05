@@ -1,8 +1,8 @@
 package xyz.lib.bookstore.service;
 
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import xyz.lib.bookstore.dto.BookDTO;
-import xyz.lib.bookstore.exception.BookConstraintViolationException;
-import xyz.lib.bookstore.exception.ResourceNotFound;
 
 import java.util.Collection;
 
@@ -24,7 +24,7 @@ public interface BookService {
      * @param id of the {@link BookDTO}
      * @return {@link BookDTO} found.
      */
-    BookDTO findBookById(Long id) throws ResourceNotFound;
+    Mono<BookDTO> findBookById(final Long id);
 
     /**
      * Finds all books that match the keyword criteria.
@@ -32,14 +32,14 @@ public interface BookService {
      * @param keyword criteria for searching the book-titles.
      * @return a {@link Collection<BookDTO>} that match the the criteria.
      */
-    Collection<BookDTO> findAllBooksByTitleContaining(String keyword);
+    Flux<BookDTO> findAllBooksByTitleContaining(final String keyword);
 
     /**
      * Find all {@link BookDTO}.
      *
      * @return A {@link Collection<BookDTO>} of {@link BookDTO}.
      */
-    Collection<BookDTO> findAllBooks();
+    Flux<BookDTO> findAllBooks();
 
     /**
      * Saves a new book.
@@ -47,7 +47,7 @@ public interface BookService {
      * @param newBook new {@link BookDTO} to save.
      * @return saved {@link BookDTO}.
      */
-    BookDTO saveNewBook(BookDTO newBook) throws BookConstraintViolationException;
+    Mono<BookDTO> saveNewBook(final BookDTO newBook);
 
     /**
      * Update an existing BookDTO.
@@ -55,19 +55,19 @@ public interface BookService {
      * @param bookDTO update an existing {@link BookDTO}.
      * @return {@link BookDTO}.
      */
-    BookDTO updateBook(BookDTO bookDTO);
+    Mono<BookDTO> updateBook(final BookDTO bookDTO);
 
     /**
      * Delete an existing {@link BookDTO}
      *
      * @param book {@link BookDTO}
      */
-    void deleteBook(BookDTO book);
+    Mono<Void> deleteBook(final BookDTO book);
 
     /**
      * Deletes book by id.
      *
      * @param id of the book.
      */
-    void deleteById(Long id);
+    Mono<Void> deleteById(final Long id);
 }

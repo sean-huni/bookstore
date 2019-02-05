@@ -1,16 +1,16 @@
 package xyz.lib.bookstore.service.impl;
 
-import xyz.lib.bookstore.model.User;
-import xyz.lib.bookstore.repo.UserRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.security.core.userdetails.ReactiveUserDetailsService;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import reactor.core.publisher.Mono;
+import xyz.lib.bookstore.model.User;
+import xyz.lib.bookstore.repo.UserRepo;
 
 /**
  * PROJECT   : bookstore
@@ -22,26 +22,36 @@ import java.util.Optional;
  * CELL      : +27-64-906-8809
  */
 
-@Service
-public class UserDetailsServiceImpl implements UserDetailsService {
+@Service("userDetailsService")
+public class UserDetailsServiceImpl implements ReactiveUserDetailsService {
     private static final Logger LOGGER = LoggerFactory.getLogger(UserDetailsServiceImpl.class);
 
     private UserRepo userRepo;
+
+    private Converter<User, UserDetails> userDetailsConverter;
 
     @Autowired
     public UserDetailsServiceImpl(UserRepo userRepo) {
         this.userRepo = userRepo;
     }
 
+    @Autowired
+    public void setUserDetailsConverter(Converter<User, UserDetails> userDetailsConverter) {
+        this.userDetailsConverter = userDetailsConverter;
+    }
+
+    /**
+     * Find the {@link UserDetails} by username.
+     *
+     * @param username the username to look up
+     * @return the {@link UserDetails}. Cannot be null
+     */
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> optionalUser = Optional.ofNullable(userRepo.findByUsername(username));
-        String errorMsg = "Username: " + username + " not found...";
+    public Mono<UserDetails> findByUsername(String username) {
+        final String errorMsg = String.format("Username: %s not found...", username);
 
-        if (!optionalUser.isPresent()) {
-            LOGGER.warn(errorMsg);
-        }
-
-        return optionalUser.orElseThrow(() -> new UsernameNotFoundException(errorMsg));
+        return userRepo.findByUsername(username).switchIfEmpty(Mono.defer(
+                () -> Mono.error(new UsernameNotFoundException(errorMsg))
+        )).map(user -> userDetailsConverter.convert(user));
     }
 }

@@ -1,5 +1,6 @@
 package xyz.lib.bookstore.exception;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
  * CELL      : +27-64-906-8809
  */
 @ResponseStatus(value = HttpStatus.CONFLICT, reason = "Integrity Violation. Book already Exists.")
-public class BookConstraintViolationException extends Exception {
+public class BookConstraintViolationException extends DataIntegrityViolationException {
     /**
      * Constructs a new exception with the specified detail message.  The
      * cause is not initialized, and may subsequently be initialized by

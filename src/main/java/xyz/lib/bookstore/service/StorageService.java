@@ -1,6 +1,7 @@
 package xyz.lib.bookstore.service;
 
 import org.springframework.web.multipart.MultipartFile;
+import reactor.core.publisher.Mono;
 import xyz.lib.bookstore.exception.ResourceNotFound;
 import xyz.lib.bookstore.exception.StorageFileNotFoundException;
 
@@ -26,7 +27,7 @@ public interface StorageService {
      * @throws ResourceNotFound when {@link xyz.lib.bookstore.model.Book}-ID is not found.
      * @throws IOException      caught if it fails to save the uploaded file-image.
      */
-    String uploadFile(Long id, MultipartFile multipart) throws ResourceNotFound, IOException;
+    Mono<String> uploadFile(Long id, MultipartFile multipart) throws ResourceNotFound, IOException;
 
 
     /**
@@ -35,5 +36,5 @@ public interface StorageService {
      * @param id {@link xyz.lib.bookstore.model.Book}
      * @throws StorageFileNotFoundException when the file no longer exists on the server.
      */
-    void deleteFile(Long id) throws IOException;
+    Mono<Void> deleteFile(Long id) throws IOException;
 }

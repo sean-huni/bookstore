@@ -2,18 +2,19 @@ package xyz.lib.bookstore.service.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 import xyz.lib.bookstore.convertor.book.BookDOConverter;
 import xyz.lib.bookstore.convertor.book.BookDTOConverter;
 import xyz.lib.bookstore.dto.BookDTO;
+import xyz.lib.bookstore.exception.BookAlreadyExistException;
 import xyz.lib.bookstore.exception.ResourceNotFound;
 import xyz.lib.bookstore.model.Book;
 import xyz.lib.bookstore.repo.BookRepo;
 import xyz.lib.bookstore.service.BookService;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 /**
  * PROJECT   : bookstore
@@ -44,10 +45,13 @@ public class BookServiceImpl implements BookService {
      * @return {@link Book} found.
      */
     @Override
-    public BookDTO findBookById(Long id) throws ResourceNotFound {
-        Optional<Book> optionalBook = bookRepo.findById(id);
+    public Mono<BookDTO> findBookById(final Long id) {
+        Optional<Book> optionalBook = bookRepo.findById(id).blockOptional();
 
-        return bookDTOConverter.convert(optionalBook.orElseThrow(() -> new ResourceNotFound("Book associated with id '" + id + "' not found.")));
+        if (optionalBook.isPresent()) {
+           return optionalBook.map(book -> Mono.just(bookDTOConverter.convert(book))).get();
+        }
+        return Mono.error(new ResourceNotFound(String.format("Book with id: %d not found.", id)));
     }
 
     /**
@@ -57,8 +61,10 @@ public class BookServiceImpl implements BookService {
      * @return a {@link Collection<BookDTO>} that match the the criteria.
      */
     @Override
-    public Collection<BookDTO> findAllBooksByTitleContaining(String keyword) {
-        return bookRepo.findAllByTitleContaining(keyword).stream().filter(Book::isActive).map(book -> bookDTOConverter.convert(book)).collect(Collectors.toList());
+    public Flux<BookDTO> findAllBooksByTitleContaining(final String keyword) {
+        return bookRepo.findAllByTitleContaining(keyword)
+                .filter(Book::isActive)
+                .map(bookDTOConverter::convert);
     }
 
     /**
@@ -67,9 +73,9 @@ public class BookServiceImpl implements BookService {
      * @return A {@link Collection <BookDTO>} of {@link Book}.
      */
     @Override
-    public Collection<BookDTO> findAllBooks() {
-        List<Book> bookList = bookRepo.findAll();
-        return bookList.stream().filter(Book::isActive).map(book -> bookDTOConverter.convert(book)).collect(Collectors.toList());
+    public Flux<BookDTO> findAllBooks() {
+        Flux<Book> bookList = bookRepo.findAll();
+        return bookList.filter(Book::isActive).map(bookDTOConverter::convert);
     }
 
     /**
@@ -79,10 +85,11 @@ public class BookServiceImpl implements BookService {
      * @return saved book.
      */
     @Override
-    public BookDTO saveNewBook(BookDTO newBook) {
-        newBook.setId(null);
-        Book book = bookDOConverter.convert(newBook);
-        return bookDTOConverter.convert(bookRepo.save(book));
+    public Mono<BookDTO> saveNewBook(final BookDTO newBook) {
+        if (findBookById(newBook.getId()).blockOptional().isEmpty()) {
+            return bookRepo.save(bookDOConverter.convert(newBook)).map(bookDTOConverter::convert);
+        }
+        return Mono.error(new BookAlreadyExistException("Book already exist. You may be trying to overwrite an existing book with the same ID."));
     }
 
     /**
@@ -92,10 +99,9 @@ public class BookServiceImpl implements BookService {
      * @return {@link BookDTO}.
      */
     @Override
-    public BookDTO updateBook(BookDTO bookDTO) {
-
-        Book book = bookDOConverter.convert(bookDTO);
-        return bookDTOConverter.convert(bookRepo.save(book));
+    public Mono<BookDTO> updateBook(final BookDTO bookDTO) {
+        final Book book = bookDOConverter.convert(bookDTO);
+        return bookRepo.save(book).map(bookDTOConverter::convert);
     }
 
     /**
@@ -104,9 +110,10 @@ public class BookServiceImpl implements BookService {
      * @param bookDTO {@link BookDTO}
      */
     @Override
-    public void deleteBook(BookDTO bookDTO) {
-        Book book = bookDOConverter.convert(bookDTO);
-        bookRepo.delete(book);
+    public Mono<Void> deleteBook(final BookDTO bookDTO) {
+        final Book book = bookDOConverter.convert(bookDTO);
+        bookRepo.delete(book).block();
+        return Mono.empty();
     }
 
 
@@ -116,7 +123,8 @@ public class BookServiceImpl implements BookService {
      * @param id of the book.
      */
     @Override
-    public void deleteById(Long id) {
-        bookRepo.deleteById(id);
+    public Mono<Void> deleteById(final Long id) {
+        bookRepo.deleteById(id).block();
+        return Mono.empty();
     }
 }

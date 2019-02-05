@@ -21,6 +21,7 @@ public class Constants {
     };
 
     public static final String PATH_VARIABLE_ID_IS_EXPECTED = "Book ID cannot be null or zero. PathVariable 'id' is expected.";
+    public static final String BOOK_COULD_NOT_BE_SAVED = "Book could not be saved.";
     public static final String RESOURCES_IMAGES = "src/main/resources/images/";
     public static final String RESP_JSON_FORMAT = "{\"resp\":\"%s\"}";
 

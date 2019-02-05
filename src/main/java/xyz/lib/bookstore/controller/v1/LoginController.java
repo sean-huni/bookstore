@@ -7,10 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
-import java.util.Collections;
-
 import static xyz.lib.bookstore.constants.Constants.RESP_JSON_FORMAT;
 
 /**
@@ -30,20 +26,20 @@ public class LoginController {
 
 
 
-    @PostMapping("/token")
-    @ResponseBody
-    public ResponseEntity token(HttpSession session, HttpServletRequest request) {
-
-        String remoteHost = request.getRemoteHost();
-        String remoteAddr = request.getRemoteAddr();
-        Integer remotePort = request.getRemotePort();
-
-
-        LOGGER.info("Remote Host: {}", remoteHost);
-        LOGGER.info("Remote Post: {}", remotePort);
-        LOGGER.info("Remote Addr: {}", remoteAddr);
-        return new ResponseEntity<>(Collections.singletonMap("token", session.getId()), HttpStatus.OK);
-    }
+//    @PostMapping("/token")
+//    @ResponseBody
+//    public ResponseEntity token(HttpSession session, HttpServletRequest request) {
+//
+//        String remoteHost = request.getRemoteHost();
+//        String remoteAddr = request.getRemoteAddr();
+//        Integer remotePort = request.getRemotePort();
+//
+//
+//        LOGGER.info("Remote Host: {}", remoteHost);
+//        LOGGER.info("Remote Post: {}", remotePort);
+//        LOGGER.info("Remote Addr: {}", remoteAddr);
+//        return new ResponseEntity<>(Collections.singletonMap("token", session.getId()), HttpStatus.OK);
+//    }
 
     @GetMapping("/checkSession")
     @ResponseBody
