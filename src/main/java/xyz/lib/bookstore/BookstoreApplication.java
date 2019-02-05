@@ -9,17 +9,15 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.scheduling.annotation.EnableAsync;
 import xyz.lib.bookstore.config.EncryptionConfig;
 import xyz.lib.bookstore.config.StorageProperties;
-import xyz.lib.bookstore.dto.BookDTO;
 import xyz.lib.bookstore.exception.BookConstraintViolationException;
 import xyz.lib.bookstore.model.Role;
 import xyz.lib.bookstore.model.User;
 import xyz.lib.bookstore.model.UserRole;
 import xyz.lib.bookstore.service.BookService;
 import xyz.lib.bookstore.service.UserService;
+import xyz.lib.bookstore.utility.AppSchemaData;
 
 import javax.annotation.PostConstruct;
-import java.math.BigDecimal;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -77,29 +75,20 @@ public class BookstoreApplication {
     }
 
     private void bookData() {
-        BookDTO bookDTO = new BookDTO();
-        bookDTO.setTitle("Harry Potter");
-        bookDTO.setAuthor("JK Rowling");
-        bookDTO.setCategory("Fiction");
-        bookDTO.setPublisher("Disney");
-        bookDTO.setDescription("Fictional characters based on the success of the Harry Potter Trilogy.");
-        bookDTO.setFormat("hardcover");
-        bookDTO.setImgPath("/dev_0/proj/web/angular/v7/app/bookstore/src/main/resources/images/4.png");
-        bookDTO.setPages(10);
-        bookDTO.setIsbn("456-456-546465-5124-4");
-        bookDTO.setLanguage("english");
-        bookDTO.setDatePublished(new Date());
-        bookDTO.setOurPrice(new BigDecimal(120.20));
-        bookDTO.setListPrice(new BigDecimal(120.20));
-        bookDTO.setWeight(1.232);
-        bookDTO.setActive(true);
-        bookDTO.setQuantity(5);
+//        Old method works fine.
+        new AppSchemaData().demoBooks().forEach(bookDTO -> {
+            try {
+                bookService.saveNewBook(bookDTO);
+            } catch (BookConstraintViolationException e) {
+                LOGGER.error(e.getMessage());
+            }
+        });
 
-        try {
-            bookService.saveNewBook(bookDTO);
-        } catch (BookConstraintViolationException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+//        try {
+//            bookService.saveAllNewBooks(new AppSchemaData().demoBooks());
+//        } catch (Exception e) {
+//            LOGGER.error(e.getMessage());
+//        }
     }
 
 }

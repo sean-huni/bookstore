@@ -50,6 +50,13 @@ public interface BookService {
     BookDTO saveNewBook(BookDTO newBook) throws BookConstraintViolationException;
 
     /**
+     * Saves a collection of books as a single batch transaction.
+     * @param newBooks a {@link Collection<BookDTO>} of books to be saved.
+     * @return saved {@link Collection<BookDTO>} of saved books.
+     */
+    Collection<BookDTO> saveAllNewBooks(Collection<BookDTO> newBooks);
+
+    /**
      * Update an existing BookDTO.
      *
      * @param bookDTO update an existing {@link BookDTO}.

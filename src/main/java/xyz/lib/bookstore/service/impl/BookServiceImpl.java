@@ -10,6 +10,7 @@ import xyz.lib.bookstore.model.Book;
 import xyz.lib.bookstore.repo.BookRepo;
 import xyz.lib.bookstore.service.BookService;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -70,6 +71,18 @@ public class BookServiceImpl implements BookService {
     public Collection<BookDTO> findAllBooks() {
         List<Book> bookList = bookRepo.findAll();
         return bookList.stream().filter(Book::isActive).map(book -> bookDTOConverter.convert(book)).collect(Collectors.toList());
+    }
+
+    /**
+     * Saves a collection of books as a single batch transaction.
+     *
+     * @param newBooks a {@link Collection<BookDTO>} of books to be saved.
+     * @return saved {@link Collection<BookDTO>} of saved books.
+     */
+    @Override
+    public Collection<BookDTO> saveAllNewBooks(Collection<BookDTO> newBooks) {
+        Iterable<Book> bookBatchCollection =  newBooks.stream().map(bookDTO -> bookDOConverter.convert(bookDTO)).collect(Collectors.toList());
+        return bookRepo.saveAll(bookBatchCollection).stream().map(book -> bookDTOConverter.convert(book)).collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
